@@ -8,6 +8,9 @@
 -->
 <html lang="en">
 <head>
+	<link rel="stylesheet" href="/static-assets/sui2/alt/styles/main.css"/>
+	<link rel="stylesheet" href="/static-assets/sui2/alt/styles/editor-content.css"/>
+
 	<#include "/templates/web/fragments/head.ftl">
 	<@crafter.head/>
 </head>
@@ -26,7 +29,7 @@
 			<!-- Content -->
 			<section>
 				<header class="main">
-          <@crafter.h1 $field="subject_t">
+          <@crafter.h1 $field="subject_t" id="${contentModel.objectId}">
             ${contentModel.subject_t!""}
           </@crafter.h1>
           <@crafter.h2 $field="author_s">
@@ -69,6 +72,75 @@
 </div>
 
 <#include "/templates/web/fragments/scripts.ftl">
+
+<script>
+	var crafterSocial_cfg = {
+		'comments.acceptTerms'          : false, // if user has to accept terms before posting or replying comment
+		'url.service': 'http://localhost:8080/crafter-social/api/3/',
+		'url.security.value': 'http://localhost:8080/crafter-social/crafter-security-login',
+		'url.security.active': 'http://localhost:8080/crafter-social/crafter-security-current-auth',
+		'url.base': '/static-assets/sui2/alt/',
+		'url.templates': '/static-assets/sui2/alt/templates/'
+	};
+
+	function crafterSocial_onAppReady ( director, CrafterSocial ) {
+		window.CKEDITOR.plugins.basePath = '/static-assets/sui/libs/ckeditor/plugins/';
+
+		CrafterSocial.$.extend(CrafterSocial.string.LOCALE, {
+			'commentable.view-comment': 'View & Comment',
+			'commentable.notify-comment': 'Notify on Reply',
+			'popover.no-comment': '(no comments)',
+			'discussion.title': 'Discussion',
+			'discussion.comment': 'Be the first to comment!',
+			'discussion.login-comment': '',
+			'options.options': 'Options',
+			'options.inline': 'Inline View',
+			'options.lightbox': 'Lightbox View',
+			'options.bubble': 'Bubble View',
+			'options.refresh': 'Refresh',
+			'options.close': 'Close',
+			'commenting.submissionLabel': 'Your submission will not appear until approved by the blog admin.',
+			'commenting.agreeTermsLabel': 'I have read and agree to Terms of Use of this blog',
+			'commenting.agreeTermsLinkText': 'LINK HERE',
+			'commenting.agreeTermsLink': '#',
+			'comments.flag': 'Report',
+			'commenting.attachmentsTip': 'Adding photos? Post your comment then add them to your post.'
+		});
+
+	}
+</script>
+
+<script src="/static-assets/sui2/alt/scripts/social.js"></script>
+
+<script>
+	$.ajax({
+		method: "POST",
+		url: "http://localhost:8080/crafter-social/crafter-security-login",
+		data: {username: "admin", password: "admin"}
+	})
+					.done(function (msg) {
+						// alert( "login successful" );
+					});
+</script>
+
+<script>
+	crafter.social.getDirector().on(crafter.social.Constants.get('EVENT_USER_AUTHENTICATION_SUCCESS'), function
+					(profile) {
+		var director = crafter.social.getDirector();
+
+		director.socialise({
+			target: '#${contentModel.objectId}',
+			context: 'f5b143c2-f1c0-4a10-b56e-f485f00d3fe9',
+			view: {
+				'parasite': {
+					'cfg': {
+						'discussionView': 'view.Inline'
+					}
+				}
+			}
+		});
+	});
+</script>
 
 <@crafter.body_bottom/>
 </body>
